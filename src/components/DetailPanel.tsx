@@ -34,7 +34,7 @@ export function DetailPanel({ record, annotation, onAnnotationChange, searchQuer
   const originalStatus = judgeStatus(record.hacked);
   const isOverridden = !!annotation && annotation.overrideHacked !== null;
 
-  const position = findPayloadPosition(record.poisoned_input, record.attack_str);
+  const position = findPayloadPosition(record.poisoned_input ?? "", record.attack_str ?? "");
   const payloadMarks =
     position.kind !== "not_found" ? [{ start: position.offset, end: position.offset + position.length, type: "payload" }] : [];
 
@@ -60,12 +60,14 @@ export function DetailPanel({ record, annotation, onAnnotationChange, searchQuer
         </div>
       </div>
 
-      <section className="detail-section">
-        <h3>Instruction</h3>
-        <div className="detail-section__body">
-          <HighlightedText text={record.instruction} query={searchQuery} />
-        </div>
-      </section>
+      {record.instruction !== undefined && (
+        <section className="detail-section">
+          <h3>Instruction</h3>
+          <div className="detail-section__body">
+            <HighlightedText text={record.instruction} query={searchQuery} />
+          </div>
+        </section>
+      )}
 
       {record.clean_input !== undefined && (
         <section className="detail-section">
@@ -76,18 +78,20 @@ export function DetailPanel({ record, annotation, onAnnotationChange, searchQuer
         </section>
       )}
 
-      <section className="detail-section">
-        <h3>
-          Poisoned Input（注入後）
-          <span className={`payload-badge payload-badge--${position.kind}`}>
-            {PAYLOAD_POSITION_LABEL[position.kind]}
-            {position.kind !== "not_found" && ` (offset: ${position.offset})`}
-          </span>
-        </h3>
-        <div className="detail-section__body detail-section__body--pre">
-          <HighlightedText text={record.poisoned_input} query={searchQuery} extraMarks={payloadMarks} />
-        </div>
-      </section>
+      {record.poisoned_input !== undefined && (
+        <section className="detail-section">
+          <h3>
+            Poisoned Input（注入後）
+            <span className={`payload-badge payload-badge--${position.kind}`}>
+              {PAYLOAD_POSITION_LABEL[position.kind]}
+              {position.kind !== "not_found" && ` (offset: ${position.offset})`}
+            </span>
+          </h3>
+          <div className="detail-section__body detail-section__body--pre">
+            <HighlightedText text={record.poisoned_input} query={searchQuery} extraMarks={payloadMarks} />
+          </div>
+        </section>
+      )}
 
       <section className="detail-section">
         <h3>Response</h3>

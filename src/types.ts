@@ -5,15 +5,18 @@ export interface LogRecord {
   domain: string;
   attack_type: string;
   attack_name: string;
-  attack_str: string;
-  instruction: string;
+  attack_str?: string;
+  instruction?: string;
   clean_input?: string;
-  poisoned_input: string;
+  poisoned_input?: string;
   response: string;
   hacked: boolean | null;
   // 将来拡張用（現状データには存在しない）
   judge_method?: string;
   judge_evidence?: string;
+  // records_asr.json形式: 1=攻撃成功 / 0=防御成功 / -1=未判定
+  asr?: number;
+  asr_method?: string;
 }
 
 // レコードを一意に識別する複合キー

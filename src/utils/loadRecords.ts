@@ -9,12 +9,28 @@ function isLogRecord(v: unknown): v is LogRecord {
     typeof r.domain === "string" &&
     typeof r.attack_type === "string" &&
     typeof r.attack_name === "string" &&
-    typeof r.attack_str === "string" &&
-    typeof r.instruction === "string" &&
-    typeof r.poisoned_input === "string" &&
     typeof r.response === "string" &&
     (typeof r.hacked === "boolean" || r.hacked === null || r.hacked === undefined)
   );
+}
+
+// records_asr.json形式などの欠損フィールドを補う（既存の値があればそれを優先）
+function normalizeRecord(v: unknown, fileCondition: string): unknown {
+  if (typeof v !== "object" || v === null) return v;
+  const r = { ...(v as Record<string, unknown>) };
+  if (typeof r.sample_id === "string" && r.sample_id.trim() !== "" && !Number.isNaN(Number(r.sample_id))) {
+    r.sample_id = Number(r.sample_id);
+  }
+  if (r.hacked === undefined && typeof r.asr === "number") {
+    r.hacked = r.asr === 1 ? true : r.asr === 0 ? false : null;
+  }
+  if (r.judge_method === undefined && typeof r.asr_method === "string") {
+    r.judge_method = r.asr_method;
+  }
+  if (r.condition === undefined) {
+    r.condition = fileCondition;
+  }
+  return r;
 }
 
 export interface LoadResult {
@@ -31,7 +47,8 @@ export async function loadRecordsFromFiles(files: FileList | File[]): Promise<Lo
       const text = await file.text();
       const data = JSON.parse(text);
       const arr = Array.isArray(data) ? data : [data];
-      const valid = arr.filter(isLogRecord);
+      const fileCondition = file.name.replace(/\.[^.]+$/, "");
+      const valid = arr.map((v) => normalizeRecord(v, fileCondition)).filter(isLogRecord);
       records.push(...valid);
       fileResults.push({
         name: file.name,
