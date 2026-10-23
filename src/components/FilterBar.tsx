@@ -21,13 +21,23 @@ const JUDGE_STATUS_OPTIONS: { value: JudgeStatus; label: string }[] = [
 export function FilterBar({ state, onChange, conditions, domains, attackTypes, attackNames, onClearAll }: Props) {
   return (
     <div className="filter-bar">
-      <input
-        className="filter-bar__search"
-        type="text"
-        placeholder="検索: instruction / poisoned_input / response / attack_str / attack_name"
-        value={state.search}
-        onChange={(e) => onChange({ ...state, search: e.target.value })}
-      />
+      <div className="filter-bar__inputs">
+        <input
+          className="filter-bar__sample-id"
+          type="text"
+          inputMode="numeric"
+          placeholder="Sample ID（例: 12, 15）"
+          value={state.sampleIds}
+          onChange={(e) => onChange({ ...state, sampleIds: e.target.value })}
+        />
+        <input
+          className="filter-bar__search"
+          type="text"
+          placeholder="検索: instruction / poisoned_input / response / attack_str / attack_name"
+          value={state.search}
+          onChange={(e) => onChange({ ...state, search: e.target.value })}
+        />
+      </div>
       <div className="filter-bar__facets">
         <FacetFilter
           label="Condition"

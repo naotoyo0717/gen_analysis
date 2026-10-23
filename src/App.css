@@ -152,8 +152,23 @@
   flex-shrink: 0;
 }
 
+.filter-bar__inputs {
+  display: flex;
+  gap: 8px;
+}
+
+.filter-bar__sample-id {
+  width: 180px;
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 2px;
+  font-size: 13px;
+}
+
 .filter-bar__search {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   padding: 6px 10px;
   border: 1px solid var(--border-strong);
   border-radius: 2px;

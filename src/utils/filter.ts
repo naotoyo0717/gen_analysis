@@ -5,6 +5,8 @@ import { textMatchesQuery } from "./highlight";
 
 export interface FilterState {
   search: string;
+  sampleIds: string; // カンマ・空白区切りの sample_id（完全一致）
+
   conditions: Set<string>;
   domains: Set<string>;
   attackTypes: Set<string>;
@@ -15,6 +17,7 @@ export interface FilterState {
 export function initialFilterState(): FilterState {
   return {
     search: "",
+    sampleIds: "",
     conditions: new Set(),
     domains: new Set(),
     attackTypes: new Set(),
@@ -26,12 +29,22 @@ export function initialFilterState(): FilterState {
 export function isFilterActive(state: FilterState): boolean {
   return (
     state.search.trim() !== "" ||
+    parseSampleIds(state.sampleIds).size > 0 ||
     state.conditions.size > 0 ||
     state.domains.size > 0 ||
     state.attackTypes.size > 0 ||
     state.attackNames.size > 0 ||
     state.judgeStatuses.size > 0
   );
+}
+
+// "12, 15 30" → {12, 15, 30}。数値でないものは無視する
+export function parseSampleIds(input: string): Set<number> {
+  const ids = new Set<number>();
+  for (const token of input.split(/[\s,、]+/)) {
+    if (/^\d+$/.test(token)) ids.add(Number(token));
+  }
+  return ids;
 }
 
 const SEARCH_FIELDS: (keyof LogRecord)[] = ["instruction", "poisoned_input", "response", "attack_str", "attack_name"];
@@ -49,6 +62,8 @@ export function matchesFilter(
   state: FilterState,
   annotations: Map<string, Annotation>,
 ): boolean {
+  const sampleIds = parseSampleIds(state.sampleIds);
+  if (sampleIds.size > 0 && !sampleIds.has(record.sample_id)) return false;
   if (state.conditions.size > 0 && !state.conditions.has(record.condition)) return false;
   if (state.domains.size > 0 && !state.domains.has(record.domain)) return false;
   if (state.attackTypes.size > 0 && !state.attackTypes.has(record.attack_type)) return false;

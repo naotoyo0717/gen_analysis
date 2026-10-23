@@ -7,7 +7,8 @@ import { DetailPanel } from "./components/DetailPanel";
 import { StatsBar } from "./components/StatsBar";
 import type { LogRecord } from "./types";
 import { recordKey } from "./types";
-import { initialFilterState, isFilterActive, matchesFilter, uniqueSorted } from "./utils/filter";
+import type { FilterState } from "./utils/filter";
+import { initialFilterState, isFilterActive, matchesFilter, parseSampleIds, uniqueSorted } from "./utils/filter";
 import { computeStats } from "./utils/stats";
 import { useAnnotationsMap, upsertAnnotation } from "./hooks/useAnnotations";
 
@@ -24,6 +25,14 @@ function App() {
       for (const r of newRecords) merged.set(recordKey(r), r);
       return Array.from(merged.values());
     });
+  };
+
+  // Sample ID を入力したら、該当する先頭レコードを自動で選択する
+  const handleFilterChange = (next: FilterState) => {
+    setFilterState(next);
+    if (next.sampleIds === filterState.sampleIds || parseSampleIds(next.sampleIds).size === 0) return;
+    const first = records.find((r) => matchesFilter(r, next, annotations));
+    if (first) setSelectedKey(recordKey(first));
   };
 
   const conditions = useMemo(() => uniqueSorted(records.map((r) => r.condition)), [records]);
@@ -60,7 +69,7 @@ function App() {
           <StatsBar stats={stats} />
           <FilterBar
             state={filterState}
-            onChange={setFilterState}
+            onChange={handleFilterChange}
             conditions={conditions}
             domains={domains}
             attackTypes={attackTypes}
