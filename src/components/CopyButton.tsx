@@ -15,7 +15,11 @@ export function CopyButton({ text }: Props) {
 
   const handleClick = async () => {
     try {
-      await navigator.clipboard.writeText(text);
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        copyWithExecCommand(text);
+      }
       setState("copied");
     } catch {
       setState("error");
@@ -27,4 +31,22 @@ export function CopyButton({ text }: Props) {
       {state === "copied" ? "コピーしました" : state === "error" ? "コピー失敗" : "コピー"}
     </button>
   );
+}
+
+// HTTP配信（非セキュアコンテキスト）では Clipboard API が使えないため、textarea + execCommand で代替する
+function copyWithExecCommand(text: string) {
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.top = "0";
+  textarea.style.left = "0";
+  textarea.style.opacity = "0";
+  document.body.appendChild(textarea);
+  textarea.select();
+  try {
+    if (!document.execCommand("copy")) throw new Error("execCommand copy failed");
+  } finally {
+    document.body.removeChild(textarea);
+  }
 }
