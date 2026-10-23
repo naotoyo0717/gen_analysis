@@ -3,6 +3,7 @@ import { judgeStatus } from "../types";
 import { findPayloadPosition, PAYLOAD_POSITION_LABEL } from "../utils/payloadPosition";
 import { HighlightedText } from "./HighlightedText";
 import { Tag } from "./Tag";
+import { CopyButton } from "./CopyButton";
 import { ReviewPanel } from "./ReviewPanel";
 import { effectiveHacked } from "../utils/stats";
 
@@ -62,7 +63,10 @@ export function DetailPanel({ record, annotation, onAnnotationChange, searchQuer
 
       {record.instruction !== undefined && (
         <section className="detail-section">
-          <h3>Instruction</h3>
+          <h3>
+            Instruction
+            <CopyButton text={record.instruction} />
+          </h3>
           <div className="detail-section__body">
             <HighlightedText text={record.instruction} query={searchQuery} />
           </div>
@@ -71,7 +75,10 @@ export function DetailPanel({ record, annotation, onAnnotationChange, searchQuer
 
       {record.clean_input !== undefined && (
         <section className="detail-section">
-          <h3>Clean Input（注入前）</h3>
+          <h3>
+            Clean Input（注入前）
+            <CopyButton text={record.clean_input} />
+          </h3>
           <div className="detail-section__body detail-section__body--pre">
             <HighlightedText text={record.clean_input} query={searchQuery} />
           </div>
@@ -86,6 +93,7 @@ export function DetailPanel({ record, annotation, onAnnotationChange, searchQuer
               {PAYLOAD_POSITION_LABEL[position.kind]}
               {position.kind !== "not_found" && ` (offset: ${position.offset})`}
             </span>
+            <CopyButton text={record.poisoned_input} />
           </h3>
           <div className="detail-section__body detail-section__body--pre">
             <HighlightedText text={record.poisoned_input} query={searchQuery} extraMarks={payloadMarks} />
@@ -94,7 +102,10 @@ export function DetailPanel({ record, annotation, onAnnotationChange, searchQuer
       )}
 
       <section className="detail-section">
-        <h3>Response</h3>
+        <h3>
+          Response
+          <CopyButton text={record.response} />
+        </h3>
         <div className="detail-section__body detail-section__body--pre">
           <HighlightedText text={record.response} query={searchQuery} />
         </div>
